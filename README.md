@@ -1,10 +1,18 @@
 # FlashPaper
 
-**Turn any academic paper into a beautiful, fully interactive, self-contained website — powered by Gemini 3.5 Flash.**
+![FlashPaper](assets/flashpaper-hero.jpg)
+
+**Turn any academic paper into a beautiful, fully interactive, self-contained website — powered by Gemini Flash.**
+
+Paste an arXiv link or drop a PDF. In ~90 seconds you get a production-grade interactive explainer with live diagrams, simulations, quizzes, and follow-up chat that actually understands the research.
 
 Paste an arXiv link or drop a PDF. ~90 seconds later you have a production-grade interactive explainer with live diagrams, simulations, quizzes, and deep-dive chat that actually understands the research.
 
 This is the ultimate stress test for long-context reasoning + high-quality code generation.
+
+## Origin
+
+This project was born from [this tweet by Jeff Dean](https://x.com/JeffDean/status/2056852774957252993), where researchers expressed a strong desire for a tool that could take any academic paper and instantly turn it into a rich, visual, interactive experience using the newly released Gemini Flash model.
 
 ## Quick Start (Local)
 
@@ -43,6 +51,16 @@ In demo mode (default until you add a key), the site only serves pre-seeded high
 - Strict linting: `ruff` + `basedpyright`
 
 See the detailed [implementation plan](.grok/sessions/.../plan.md) for architecture decisions.
+
+## Screenshots
+
+### Landing Page with Famous Papers
+![Landing Page](assets/landing.png)
+
+### Interactive Demo Example (Attention Is All You Need)
+![Attention Demo](assets/attention-demo.png)
+
+The demos above are fully functional, self-contained websites generated (or hand-curated to the same standard) by Gemini Flash.
 
 ## Development Commands
 
