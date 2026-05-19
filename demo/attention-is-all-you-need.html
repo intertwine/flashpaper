@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attention Is All You Need — Interactive Explainer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    body { font-family: 'Inter', system_ui, sans-serif; }
+    .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+    .section { scroll-margin-top: 80px; }
+    .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+    .matrix-cell { transition: all 0.1s; cursor: pointer; }
+    .matrix-cell:hover { filter: brightness(1.3); transform: scale(1.1); }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <!-- Mini nav for demo -->
+  <div class="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/95 backdrop-blur">
+    <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between text-sm">
+      <div class="flex items-center gap-3">
+        <span class="font-semibold">FlashPaper</span>
+        <span class="text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-400/10">DEMO</span>
+      </div>
+      <div class="flex gap-6 text-xs">
+        <a href="#core" class="hover:text-white">Core Idea</a>
+        <a href="#attention" class="hover:text-white">Live Attention</a>
+        <a href="#quiz" class="hover:text-white">Quiz</a>
+        <a href="/" class="text-yellow-300">← New paper</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-6 pt-12 pb-24">
+    <!-- Hero -->
+    <div class="flex flex-col items-start">
+      <div class="uppercase tracking-[3px] text-xs text-yellow-400">2017 • NEURIPS</div>
+      <h1 class="font-display text-6xl tracking-tighter font-semibold mt-2">Attention Is All You Need</h1>
+      <p class="text-2xl text-zinc-400 mt-2">Vaswani et al.</p>
+      
+      <div class="mt-6 flex gap-3">
+        <a href="https://arxiv.org/pdf/1706.03762" target="_blank" 
+           class="px-5 py-2 rounded-2xl border border-white/20 text-sm hover:bg-white/5">Original PDF</a>
+        <button onclick="window.location.reload()" 
+                class="px-5 py-2 rounded-2xl bg-white text-zinc-950 text-sm font-semibold">Regenerate (demo)</button>
+      </div>
+    </div>
+
+    <!-- TL;DR -->
+    <div class="glass mt-10 rounded-3xl p-8">
+      <div class="text-yellow-400 text-xs tracking-widest mb-2">THE BIG IDEA</div>
+      <div class="text-3xl tracking-tighter">Replace recurrence and convolutions entirely with attention mechanisms.</div>
+      <div class="mt-4 text-lg text-zinc-300">The Transformer achieves 28.4 BLEU on WMT 2014 English-to-German (improving over best ensembles) while being 8× faster to train and 3× faster at inference.</div>
+    </div>
+
+    <!-- Core Architecture -->
+    <div id="core" class="section mt-12">
+      <div class="uppercase text-xs text-yellow-400 mb-3 tracking-widest">ARCHITECTURE</div>
+      <h2 class="text-4xl tracking-tighter font-semibold mb-6">The Transformer</h2>
+      
+      <div class="prose prose-invert max-w-none text-lg">
+        <p>The model is an encoder-decoder stack. Each layer has a multi-head self-attention sub-layer followed by a feed-forward network. Residual connections and layer-norm surround each sub-layer.</p>
+      </div>
+
+      <!-- Mermaid diagram -->
+      <div class="mt-8 glass rounded-3xl p-8">
+        <div id="arch-diagram" class="mermaid text-sm">
+graph TD
+    A[Input Embeddings + Positional Encoding] --> B[Encoder Stack<br/>N=6 layers]
+    B --> C[Decoder Stack<br/>N=6 layers]
+    C --> D[Linear + Softmax]
+    D --> E[Output Probabilities]
+    
+    B -->|Encoder-Decoder<br/>Attention| C
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Attention Visualizer -->
+    <div id="attention" class="section mt-14">
+      <div class="flex items-end justify-between mb-4">
+        <div>
+          <div class="uppercase text-xs text-yellow-400 tracking-widest">INTERACTIVE</div>
+          <h2 class="text-4xl tracking-tighter font-semibold">Multi-Head Attention Playground</h2>
+        </div>
+        <div class="text-xs text-zinc-400">Click any cell to see the weight</div>
+      </div>
+
+      <div class="glass rounded-3xl p-8">
+        <div class="flex gap-6 items-center mb-4 text-sm">
+          <label class="flex items-center gap-2">
+            <span class="text-xs">Heads</span>
+            <select id="head-select" class="bg-zinc-900 border border-white/10 rounded px-2 py-1 text-xs" onchange="renderAttentionMatrix()">
+              <option>Head 1 (syntactic)</option>
+              <option>Head 5 (positional)</option>
+              <option>Head 8 (semantic)</option>
+            </select>
+          </label>
+          <button onclick="randomizeMatrix()" class="text-xs px-3 py-1 rounded border border-white/20 hover:bg-white/5">Randomize weights</button>
+          <button onclick="resetDemoMatrix()" class="text-xs px-3 py-1 rounded border border-white/20 hover:bg-white/5">Reset</button>
+        </div>
+
+        <div id="attention-matrix" class="grid grid-cols-8 gap-1 bg-zinc-900 p-3 rounded-2xl font-mono text-[10px] select-none"></div>
+        
+        <div id="attention-detail" class="mt-4 text-sm text-emerald-300 font-mono min-h-[20px]"></div>
+      </div>
+    </div>
+
+    <!-- Key Result -->
+    <div class="mt-14">
+      <div class="uppercase text-xs text-yellow-400 tracking-widest mb-3">RESULTS</div>
+      <h3 class="text-3xl tracking-tighter mb-6">Training Efficiency vs Previous SOTA</h3>
+      <canvas id="results-chart" height="120" class="glass rounded-3xl p-6"></canvas>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz" class="section mt-14">
+      <div class="uppercase text-xs text-yellow-400 tracking-widest mb-3">TEST YOURSELF</div>
+      <h2 class="text-4xl tracking-tighter font-semibold mb-6">Mastery Quiz</h2>
+      
+      <div class="space-y-4" id="quiz-container"></div>
+      
+      <div id="quiz-result" class="hidden mt-6 text-center glass p-6 rounded-3xl">
+        <div id="quiz-score" class="text-4xl font-semibold"></div>
+        <div id="quiz-feedback" class="text-lg mt-2 text-zinc-300"></div>
+      </div>
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-white/10 text-xs text-center text-zinc-500">
+      This is a high-fidelity demo explainer hand-crafted to set the quality bar.<br>
+      The real version is generated entirely by Gemini 3.5 Flash from the PDF with zero human HTML editing.
+    </div>
+  </div>
+
+  <script>
+    // Tailwind + Mermaid init
+    function init() {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.tailwindcss.com';
+      script.onload = () => {
+        // already loaded via CDN
+      };
+      document.head.appendChild(script);
+      
+      if (window.mermaid) {
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      }
+    }
+    init();
+
+    // Attention matrix (8x8 toy)
+    let matrix = [
+      [0.9,0.05,0.01,0.01,0.01,0.01,0.01,0.01],
+      [0.1,0.7,0.1,0.03,0.02,0.02,0.02,0.01],
+      [0.02,0.1,0.75,0.05,0.03,0.02,0.02,0.01],
+      [0.01,0.03,0.1,0.8,0.03,0.01,0.01,0.01],
+      [0.01,0.02,0.03,0.05,0.82,0.04,0.02,0.01],
+      [0.01,0.01,0.02,0.02,0.1,0.78,0.05,0.01],
+      [0.01,0.01,0.01,0.01,0.03,0.08,0.8,0.05],
+      [0.01,0.01,0.01,0.01,0.01,0.02,0.1,0.83]
+    ];
+
+    function renderAttentionMatrix() {
+      const container = document.getElementById('attention-matrix');
+      container.innerHTML = '';
+      container.style.gridTemplateColumns = 'repeat(8, 1fr)';
+      
+      const head = document.getElementById('head-select').selectedIndex;
+      const factor = 0.7 + head * 0.1; // fake head variation
+      
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          const val = Math.min(0.98, matrix[i][j] * factor);
+          const cell = document.createElement('div');
+          cell.className = 'matrix-cell aspect-square rounded flex items-center justify-center text-[9px] font-mono border border-white/10';
+          const intensity = Math.floor(val * 220);
+          cell.style.background = `rgb(${intensity}, ${Math.floor(intensity*0.9)}, ${Math.floor(intensity*0.3)})`;
+          cell.style.color = val > 0.4 ? '#111' : '#ddd';
+          cell.textContent = val.toFixed(2);
+          cell.onclick = () => {
+            document.getElementById('attention-detail').innerHTML = 
+              `Token ${i} → Token ${j} : <span class="font-bold">${val.toFixed(3)}</span> (head ${head+1})`;
+          };
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function randomizeMatrix() {
+      for (let i=0;i<8;i++) for (let j=0;j<8;j++) {
+        matrix[i][j] = Math.random() * 0.6 + 0.05;
+      }
+      // renormalize rows roughly
+      for (let i=0;i<8;i++) {
+        const sum = matrix[i].reduce((a,b)=>a+b,0);
+        matrix[i] = matrix[i].map(v => v/sum);
+      }
+      renderAttentionMatrix();
+    }
+
+    function resetDemoMatrix() {
+      matrix = [
+        [0.9,0.05,0.01,0.01,0.01,0.01,0.01,0.01],
+        [0.1,0.7,0.1,0.03,0.02,0.02,0.02,0.01],
+        [0.02,0.1,0.75,0.05,0.03,0.02,0.02,0.01],
+        [0.01,0.03,0.1,0.8,0.03,0.01,0.01,0.01],
+        [0.01,0.02,0.03,0.05,0.82,0.04,0.02,0.01],
+        [0.01,0.01,0.02,0.02,0.1,0.78,0.05,0.01],
+        [0.01,0.01,0.01,0.01,0.03,0.08,0.8,0.05],
+        [0.01,0.01,0.01,0.01,0.01,0.02,0.1,0.83]
+      ];
+      renderAttentionMatrix();
+    }
+
+    // Results chart
+    function initChart() {
+      const ctx = document.getElementById('results-chart');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['RNN Ensemble', 'ConvS2S', 'Transformer (base)', 'Transformer (big)'],
+          datasets: [{
+            label: 'BLEU (EN-DE)',
+            data: [26.3, 26.5, 27.3, 28.4],
+            backgroundColor: ['#444', '#555', '#eab308', '#fde047']
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true, max: 30, grid: { color: '#222' } }, x: { grid: { color: '#222' } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // Quiz
+    const quizQuestions = [
+      { q: "What component did the Transformer completely remove?", opts: ["Recurrence", "Attention", "LayerNorm", "Embeddings"], correct: 0 },
+      { q: "How many attention heads are used in the base model?", opts: ["4", "8", "16", "32"], correct: 1 },
+      { q: "The paper reports the big model is how much faster to train than the best RNN ensemble?", opts: ["2×", "4×", "8×", "16×"], correct: 2 },
+    ];
+
+    function renderQuiz() {
+      const box = document.getElementById('quiz-container');
+      box.innerHTML = '';
+      quizQuestions.forEach((item, idx) => {
+        const qdiv = document.createElement('div');
+        qdiv.className = 'glass rounded-2xl p-5';
+        qdiv.innerHTML = `
+          <div class="font-medium mb-3">${idx+1}. ${item.q}</div>
+          <div class="grid grid-cols-2 gap-2" id="q-${idx}"></div>
+        `;
+        const opts = qdiv.querySelector(`#q-${idx}`);
+        item.opts.forEach((opt, oidx) => {
+          const b = document.createElement('button');
+          b.className = 'text-left px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 text-sm';
+          b.textContent = opt;
+          b.onclick = () => {
+            const all = opts.querySelectorAll('button');
+            all.forEach(bb => bb.disabled = true);
+            if (oidx === item.correct) {
+              b.classList.add('!border-emerald-400', '!bg-emerald-400/10');
+              b.textContent = '✓ ' + opt;
+            } else {
+              b.classList.add('!border-red-400', '!bg-red-400/10');
+              all[item.correct].classList.add('!border-emerald-400', '!bg-emerald-400/10');
+              all[item.correct].textContent = '✓ ' + item.opts[item.correct];
+            }
+          };
+          opts.appendChild(b);
+        });
+        box.appendChild(qdiv);
+      });
+    }
+
+    // Boot everything
+    window.onload = () => {
+      renderAttentionMatrix();
+      initChart();
+      renderQuiz();
+      
+      // Keyboard hint
+      console.log('%c[FlashPaper Demo] This is the quality bar the LLM must match or exceed.', 'color:#666');
+    };
+  </script>
+</body>
+</html>

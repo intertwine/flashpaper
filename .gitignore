@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+
+# FlashPaper specific
+.env
+generated/
+*.log
+.DS_Store
+__pycache__/
+*.py[oc]
+*.egg-info/
+dist/
+build/

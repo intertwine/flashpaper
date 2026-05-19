@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlashPaper — Papers that explain themselves</title>
+  <meta name="description" content="Upload or link any academic paper. Gemini 3.5 Flash turns it into a stunning, fully interactive website in ~90 seconds.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    
+    :root {
+      --accent: 234 179 8;
+    }
+    
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-feature-settings: "ss01";
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hero-grid {
+      background-image: 
+        linear-gradient(rgba(234,179,8,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(234,179,8,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .paper-float {
+      animation: paperFloat 25s ease-in-out infinite;
+    }
+
+    @keyframes paperFloat {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-25px) rotate(2deg); }
+    }
+
+    .section-header {
+      font-size: 13px;
+      letter-spacing: 0.125em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .nav-active {
+      color: white;
+      border-bottom: 2px solid rgb(234 179 8);
+    }
+
+    .demo-card {
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), 
+                  box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .demo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    .upload-zone {
+      transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .upload-zone.dragover {
+      background: rgba(234,179,8,0.08);
+      border-color: rgb(234 179 8);
+    }
+
+    .result-card {
+      animation: slideUp 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .subtle-glow {
+      box-shadow: 0 0 0 1px rgba(234,179,8,0.1),
+                  0 10px 15px -3px rgb(0 0 0 / 0.3);
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 selection:bg-yellow-400/30">
+  <!-- Top nav -->
+  <nav class="border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
+            <span class="text-zinc-950 font-bold text-xl leading-none mt-0.5">F</span>
+          </div>
+          <div>
+            <span class="font-semibold tracking-tighter text-2xl">FlashPaper</span>
+          </div>
+        </div>
+        <div class="ml-1 px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-mono tracking-[2px] text-yellow-400/80">GEMINI 3.5 FLASH</div>
+      </div>
+      
+      <div class="flex items-center gap-6 text-sm">
+        <a href="#how" class="hover:text-white text-zinc-400 transition">How it works</a>
+        <a href="/examples" class="hover:text-white text-zinc-400 transition">Examples</a>
+        <a href="https://github.com" target="_blank" class="hover:text-white text-zinc-400 transition">GitHub</a>
+        <button onclick="document.getElementById('input-section').scrollIntoView({behavior:'smooth'})" 
+                class="px-5 py-1.5 rounded-2xl bg-white text-zinc-950 text-sm font-semibold hover:bg-white/90 active:scale-[0.985] transition">
+          Try it now
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="relative overflow-hidden">
+    <div class="hero-grid absolute inset-0 opacity-60"></div>
+    
+    <div class="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center relative">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-1 text-xs tracking-[1.5px] mb-6">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="font-medium text-emerald-400">POWERED BY GEMINI 3.5 FLASH</span>
+      </div>
+
+      <h1 class="font-display text-7xl md:text-7xl tracking-tighter font-semibold leading-[1.05] mb-4">
+        Academic papers,<br>
+        <span class="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent">finally alive.</span>
+      </h1>
+      
+      <p class="max-w-2xl mx-auto text-2xl text-zinc-400 tracking-tight">
+        Paste a URL or drop a PDF.<br>
+        In ~90 seconds you get a <span class="text-yellow-300">beautiful, interactive, self-contained website</span> that actually explains the research.
+      </p>
+
+      <div class="flex items-center justify-center gap-4 mt-8">
+        <button onclick="document.getElementById('input-section').scrollIntoView({behavior:'smooth'})" 
+                class="group flex items-center gap-3 rounded-3xl bg-white px-8 py-4 text-lg font-semibold text-zinc-950 hover:bg-white/95 active:scale-[0.985] transition-all shadow-xl shadow-black/40">
+          Generate explainer
+          <span class="group-active:translate-x-0.5 transition">→</span>
+        </button>
+        <a href="#famous-papers" 
+           class="flex items-center gap-3 rounded-3xl border border-white/20 px-8 py-4 text-lg font-medium hover:bg-white/5 transition">
+          Browse famous papers
+        </a>
+      </div>
+
+      <div class="mt-6 text-xs text-zinc-500 flex items-center justify-center gap-4">
+        <div>✓ 1M+ context window</div>
+        <div>✓ Native PDF + figure understanding</div>
+        <div>✓ Production-grade JS &amp; visuals</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Famous Papers - Instant Demos (the casual user entry point the user requested) -->
+  <div id="famous-papers" class="max-w-6xl mx-auto px-6 pb-16">
+    <div class="flex items-center justify-between mb-5 px-1">
+      <div>
+        <div class="uppercase tracking-[2px] text-xs text-yellow-400 font-semibold">No paper handy?</div>
+        <div class="text-3xl font-semibold tracking-tighter">Explore these famous papers instantly</div>
+      </div>
+      <a href="/examples" class="text-sm text-yellow-300 hover:text-yellow-200 hidden md:block">View full gallery →</a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for demo in demos %}
+      <a href="/p/{{ demo.slug }}" 
+         class="group block glass rounded-3xl p-5 hover:border-yellow-400/30 border border-white/10 transition-all active:scale-[0.985]">
+        <div class="flex justify-between items-start">
+          <div class="min-w-0">
+            <div class="font-semibold text-lg tracking-tight group-hover:text-yellow-300 transition truncate">{{ demo.title }}</div>
+            <div class="text-xs text-emerald-400 mt-1">{{ demo.year or "Classic" }} • {{ demo.venue or "Research" }}</div>
+          </div>
+          <div class="text-yellow-400/60 group-hover:text-yellow-300 transition text-lg leading-none mt-1">→</div>
+        </div>
+        <div class="mt-4 text-sm text-zinc-400 line-clamp-2">
+          {{ demo.tagline or "A landmark paper with rich interactive visualizations and explanations." }}
+        </div>
+        <div class="mt-4 text-[10px] text-white/40 group-hover:text-white/60 flex items-center gap-1">
+          OPEN INTERACTIVE EXPLAINER
+        </div>
+      </a>
+      {% else %}
+      <!-- Fallback if no demos seeded yet -->
+      <div class="col-span-4 text-center py-8 text-zinc-400 text-sm">
+        Demo papers will appear here once seeded. Run the seeding script to populate instant famous paper examples.
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-3 text-xs text-zinc-500">All demos are fully interactive, self-contained HTML files — no API call required.</div>
+  </div>
+
+  <!-- Input Section -->
+  <div id="input-section" class="max-w-4xl mx-auto px-6 pb-20">
+    <div class="glass rounded-3xl p-8 md:p-10 subtle-glow">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="section-header text-yellow-400 mb-1">Start here</div>
+          <div class="text-3xl font-semibold tracking-tighter">Upload or link your paper</div>
+        </div>
+        {% if demo_mode %}
+        <div class="text-xs px-3 py-1 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">DEMO MODE — live generation disabled</div>
+        {% endif %}
+      </div>
+
+      <!-- URL Input -->
+      <form id="url-form" action="/analyze" method="post" class="mb-6">
+        <div class="flex gap-3">
+          <input type="url" name="url" id="paper-url"
+                 class="flex-1 bg-zinc-900 border border-white/10 focus:border-yellow-400/60 placeholder:text-zinc-500 text-lg rounded-2xl px-6 py-4 outline-none transition"
+                 placeholder="https://arxiv.org/abs/1706.03762 or direct PDF URL"
+                 autocomplete="off">
+          <button type="submit"
+                  class="shrink-0 rounded-2xl bg-yellow-400 hover:bg-yellow-300 active:bg-yellow-500 transition px-10 font-semibold text-xl text-zinc-950 disabled:opacity-60">
+            Generate
+          </button>
+        </div>
+        <div class="text-[11px] text-zinc-500 mt-2 px-1">arXiv, OpenReview, direct PDF, DOI links — we resolve automatically</div>
+      </form>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-4 my-6">
+        <div class="h-px flex-1 bg-white/10"></div>
+        <div class="text-xs text-zinc-500 font-medium tracking-widest">OR</div>
+        <div class="h-px flex-1 bg-white/10"></div>
+      </div>
+
+      <!-- File Upload -->
+      <div id="upload-zone"
+           class="upload-zone border-2 border-dashed border-white/15 hover:border-yellow-400/40 rounded-3xl p-9 text-center cursor-pointer group">
+        <input type="file" id="pdf-file" accept=".pdf,application/pdf" class="hidden">
+        
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-2xl bg-white/5 group-hover:bg-yellow-400/10 flex items-center justify-center mb-4 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903 5 5 0 019.8 1.603 4.5 4.5 0 01-1.5 8.8M12 16v4m-4-4v4m8-4v4" />
+            </svg>
+          </div>
+          <div class="font-medium">Drop your PDF here</div>
+          <div class="text-sm text-zinc-500 mt-1">or click to browse • max {{ 25 }} MB</div>
+        </div>
+      </div>
+
+      <!-- Status / Result area -->
+      <div id="result-area" class="hidden mt-6"></div>
+    </div>
+
+    <!-- Trust / Tech -->
+    <div class="text-center mt-6 text-xs text-zinc-500">
+      Powered by <span class="font-medium text-yellow-300">{{ model_name }}</span> • 
+      Typical paper (12 pages) → 65k token interactive website in &lt; 90s • 
+      {% if demo_mode %}Currently in demo mode{% else %}Real API calls enabled{% endif %}
+    </div>
+  </div>
+
+  <!-- Examples -->
+  {% if demos %}
+  <div class="max-w-6xl mx-auto px-6 pb-24">
+    <div class="flex items-baseline justify-between mb-6 px-1">
+      <div>
+        <div class="section-header text-yellow-400">Instant examples</div>
+        <div class="text-3xl font-semibold tracking-tighter">See what great looks like</div>
+      </div>
+      <a href="/examples" class="text-sm text-yellow-300 hover:text-yellow-200 flex items-center gap-1">Browse all →</a>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      {% for demo in demos %}
+      <a href="/p/{{ demo.slug }}" class="demo-card group block glass rounded-3xl p-6 hover:border-yellow-400/30 border border-white/5">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="font-semibold text-xl tracking-tighter group-hover:text-yellow-300 transition">{{ demo.title }}</div>
+            <div class="text-xs text-emerald-400 mt-2">PRE-GENERATED • CLICK TO VIEW</div>
+          </div>
+          <div class="text-yellow-400/70 group-hover:text-yellow-300 transition">→</div>
+        </div>
+        <div class="mt-8 text-xs text-zinc-400">The original paper that started the transformer revolution. This explainer includes live attention visualization, a runnable toy transformer, and an 8-question mastery quiz.</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- How it works -->
+  <div id="how" class="border-t border-white/10 bg-black/30 py-16">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <div class="section-header text-yellow-400 mb-3">The magic</div>
+        <div class="text-4xl font-semibold tracking-tighter">How FlashPaper actually works</div>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-6 text-sm">
+        <div class="space-y-3">
+          <div class="text-yellow-400 font-semibold text-4xl tracking-tighter">01</div>
+          <div class="font-medium text-lg">Ingest</div>
+          <div class="text-zinc-400">We download the PDF (arXiv resolver included) and send it straight to Gemini using the native Files API. No text extraction loss — layout, tables, and figures are preserved.</div>
+        </div>
+        <div class="space-y-3">
+          <div class="text-yellow-400 font-semibold text-4xl tracking-tighter">02</div>
+          <div class="font-medium text-lg">Deep read</div>
+          <div class="text-zinc-400">Gemini 3.5 Flash reads the entire paper with its massive context window, understanding every equation, ablation, and figure caption in one shot.</div>
+        </div>
+        <div class="space-y-3">
+          <div class="text-yellow-400 font-semibold text-4xl tracking-tighter">03</div>
+          <div class="font-medium text-lg">Design + code</div>
+          <div class="text-zinc-400">A carefully engineered prompt turns the paper into a production-quality single-file website using Tailwind, Chart.js, Mermaid, KaTeX, and hand-crafted interaction patterns that actually work.</div>
+        </div>
+        <div class="space-y-3">
+          <div class="text-yellow-400 font-semibold text-4xl tracking-tighter">04</div>
+          <div class="font-medium text-lg">Live website</div>
+          <div class="text-zinc-400">You receive a self-contained, shareable HTML file. Everything runs in the browser. No backend needed. Download it, host it anywhere, or keep exploring with the built-in chat.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="border-t border-white/10 py-8 text-xs text-zinc-500">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-y-3">
+      <div>© {{ year }} FlashPaper — Built as a stress test &amp; love letter to Gemini 3.5 Flash</div>
+      <div class="flex gap-5">
+        <a href="#" class="hover:text-zinc-300">GitHub</a>
+        <a href="#" class="hover:text-zinc-300">X / Twitter</a>
+        <a href="/health" class="hover:text-zinc-300">Status</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Tailwind script config
+    function initTailwind() {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .glass { background: rgba(255,255,255,0.025); }
+      `;
+      document.head.appendChild(style);
+    }
+    initTailwind();
+
+    // Upload zone interactions
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('pdf-file');
+    const resultArea = document.getElementById('result-area');
+
+    function showResult(html) {
+      resultArea.innerHTML = html;
+      resultArea.classList.remove('hidden');
+      resultArea.classList.add('result-card');
+    }
+
+    function setLoading(isLoading, message = "Analyzing paper with Gemini...") {
+      if (isLoading) {
+        showResult(`
+          <div class="flex items-center gap-4 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 px-6 py-5">
+            <div class="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+            <div>
+              <div class="font-medium">${message}</div>
+              <div class="text-xs text-yellow-300/70 mt-0.5">This usually takes 60–110 seconds for a full paper</div>
+            </div>
+          </div>
+        `);
+      }
+    }
+
+    // Drag and drop
+    ['dragenter', 'dragover'].forEach(evt => {
+      uploadZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      uploadZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+      });
+    });
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') handleFile(file);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    async function handleFile(file) {
+      if (file.size > 25 * 1024 * 1024) {
+        showResult(`<div class="text-red-400">File too large. Max 25 MB.</div>`);
+        return;
+      }
+      setLoading(true, `Uploading ${file.name} to Gemini...`);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/analyze', { method: 'POST', body: formData });
+        const data = await res.json();
+        
+        if (data.url) {
+          window.location.href = data.url;   // instant redirect for demo
+        } else {
+          showResult(`
+            <div class="rounded-2xl border border-white/10 p-5 text-sm">
+              ${data.message || 'Job created.'}<br>
+              <a href="/p/${data.slug || 'attention-is-all-you-need'}" class="text-yellow-300 underline">View explainer</a>
+            </div>
+          `);
+        }
+      } catch (err) {
+        showResult(`<div class="text-red-400">Upload failed. ${err}</div>`);
+      }
+    }
+
+    // URL form handling
+    const urlForm = document.getElementById('url-form');
+    urlForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('paper-url').value.trim();
+      if (!url) return;
+
+      setLoading(true, 'Resolving URL and sending to Gemini 3.5 Flash...');
+
+      const formData = new FormData();
+      formData.append('url', url);
+
+      try {
+        const res = await fetch('/analyze', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.status === 'completed' && data.url) {
+          window.location.href = data.url;
+        } else {
+          showResult(`
+            <div class="rounded-2xl border border-white/10 p-5">
+              <div class="font-medium mb-1">${data.message || 'Job started'}</div>
+              ${data.slug ? `<a href="/p/${data.slug}" class="text-yellow-300">Open explainer →</a>` : ''}
+            </div>
+          `);
+        }
+      } catch (err) {
+        showResult(`<div class="text-red-400 text-sm">Something went wrong. Try the demo examples instead.</div>`);
+      }
+    });
+
+    // Keyboard niceties
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement.tagName === 'BODY') {
+        e.preventDefault();
+        document.getElementById('paper-url').focus();
+      }
+    });
+    
+    // Subtle console message for nerds
+    console.log('%c[FlashPaper] Ready. The ultimate Gemini long-context + code-gen stress test is live.', 'color:#444');
+  </script>
+</body>
+</html>

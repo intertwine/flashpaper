@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adam Optimizer — Interactive Explainer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>body { font-family: 'Inter', system_ui, sans-serif; }</style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="text-emerald-400 text-xs mb-1">2015 • ICLR</div>
+    <h1 class="text-5xl font-semibold tracking-tighter">Adam: A Method for Stochastic Optimization</h1>
+    <p class="mt-2 text-2xl text-zinc-400">Kingma & Ba — the optimizer you are almost certainly using right now.</p>
+
+    <div class="mt-10 grid md:grid-cols-2 gap-6">
+      <div class="glass rounded-3xl p-8">
+        <div class="text-yellow-400 text-xs tracking-widest">WHY IT MATTERS</div>
+        <div class="mt-3 text-xl">Combines the best of momentum (fast travel) and RMSProp (per-parameter scaling).</div>
+        <div class="mt-6 text-sm text-zinc-400">Adam adapts the learning rate for each parameter using estimates of first and second moments of the gradients.</div>
+      </div>
+
+      <div class="glass rounded-3xl p-8 font-mono text-sm">
+        <div class="text-yellow-400 text-xs tracking-widest mb-3">THE UPDATE RULES</div>
+        mₜ = β₁ mₜ₋₁ + (1−β₁) gₜ<br>
+        vₜ = β₂ vₜ₋₁ + (1−β₂) gₜ²<br>
+        θₜ = θₜ₋₁ − α · mₜ / (√vₜ + ε)
+      </div>
+    </div>
+
+    <!-- Live playground -->
+    <div class="mt-10 glass rounded-3xl p-8">
+      <div class="font-medium mb-4">Live Adam vs SGD on a simple quadratic bowl</div>
+      <canvas id="loss-curve" height="110"></canvas>
+
+      <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div>
+          <label class="text-xs text-white/50">Learning rate α</label>
+          <input type="range" id="lr" min="0.001" max="0.5" step="0.001" value="0.1" oninput="runSim()" class="w-full accent-yellow-400">
+          <div id="lr-val" class="font-mono text-xs">0.100</div>
+        </div>
+        <div>
+          <label class="text-xs text-white/50">β₁ (momentum)</label>
+          <input type="range" id="b1" min="0.7" max="0.99" step="0.01" value="0.9" oninput="runSim()" class="w-full accent-yellow-400">
+          <div id="b1-val" class="font-mono text-xs">0.90</div>
+        </div>
+        <div>
+          <label class="text-xs text-white/50">β₂ (RMS)</label>
+          <input type="range" id="b2" min="0.9" max="0.999" step="0.001" value="0.999" oninput="runSim()" class="w-full accent-yellow-400">
+          <div id="b2-val" class="font-mono text-xs">0.999</div>
+        </div>
+        <div class="flex items-end">
+          <button onclick="runSim()" class="px-5 py-2 rounded-2xl bg-white text-zinc-950 text-sm font-semibold">Re-run simulation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let chart;
+    function runSim() {
+      const lr = parseFloat(document.getElementById('lr').value);
+      const b1 = parseFloat(document.getElementById('b1').value);
+      const b2 = parseFloat(document.getElementById('b2').value);
+
+      document.getElementById('lr-val').textContent = lr.toFixed(3);
+      document.getElementById('b1-val').textContent = b1.toFixed(2);
+      document.getElementById('b2-val').textContent = b2.toFixed(3);
+
+      const steps = 60;
+      const sgdLoss = [];
+      const adamLoss = [];
+      let x = 5, v = 0, m = 0, vhat = 0;
+
+      for (let t = 1; t <= steps; t++) {
+        // toy loss: 0.5 * x^2
+        const g = x; // gradient of 0.5 x^2
+
+        // SGD
+        x -= lr * g;
+        sgdLoss.push(0.5 * x * x);
+
+        // Adam (simplified, no bias correction for demo clarity)
+        m = b1 * m + (1 - b1) * g;
+        v = b2 * v + (1 - b2) * g * g;
+        const mhat = m / (1 - Math.pow(b1, t));
+        const vhat_ = v / (1 - Math.pow(b2, t));
+        x -= lr * mhat / (Math.sqrt(vhat_) + 1e-8);
+        adamLoss.push(0.5 * x * x);
+      }
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('loss-curve');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: steps}, (_, i) => i + 1),
+          datasets: [
+            { label: 'SGD', data: sgdLoss, borderColor: '#888', borderWidth: 2, tension: 0.2 },
+            { label: 'Adam', data: adamLoss, borderColor: '#fde047', borderWidth: 3, tension: 0.25 }
+          ]
+        },
+        options: {
+          animation: false,
+          scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { color: '#222' } } },
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+    window.onload = () => runSim();
+  </script>
+</body>
+</html>

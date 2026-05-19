@@ -1,7 +1,53 @@
 [project]
 name = "flashpaper"
 version = "0.1.0"
-description = "Add your description here"
+description = "FlashPaper — Turn academic papers into beautiful, fully interactive websites powered by Gemini 3.5 Flash"
 readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.10"
-dependencies = []
+authors = [{name = "FlashPaper Team"}]
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "fastapi>=0.136.1",
+    "google-genai>=2.1.0",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "pypdf>=6.11.0",
+    "python-dotenv>=1.2.2",
+    "python-multipart>=0.0.28",
+    "uvicorn[standard]>=0.46.0",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.39.4",
+    "reportlab>=4.5.1",
+    "ruff>=0.15.12",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = ["generated/*", "demo/*", ".venv/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008"]  # line length (we use 100), B008 for FastAPI Depends
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.basedpyright]
+include = ["app"]
+exclude = ["generated/**", "demo/**", ".venv/**"]
+typeCheckingMode = "standard"
+reportMissingImports = "error"
+
+[project.scripts]
+flashpaper = "app.main:cli_entry"
