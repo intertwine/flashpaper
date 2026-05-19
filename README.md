@@ -10,7 +10,7 @@ This is the ultimate stress test for long-context reasoning + high-quality code 
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-org/flashpaper
+git clone https://github.com/intertwine/flashpaper
 cd flashpaper
 
 # 2. Install (uv is required)
