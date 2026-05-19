@@ -50,7 +50,7 @@ In demo mode (default until you add a key), the site only serves pre-seeded high
 - SQLite for metadata + file system for artifacts
 - Strict linting: `ruff` + `basedpyright`
 
-See the detailed [implementation plan](.grok/sessions/.../plan.md) for architecture decisions.
+See `CLAUDE.md` and `AGENTS.md` for development guidelines.
 
 ## Screenshots
 
